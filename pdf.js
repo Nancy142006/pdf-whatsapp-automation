@@ -42,7 +42,7 @@ const page2Fields = {
   "ECD site is enclosed": { x: 485, y: 612 },
   "ECD site is not near hazards": { x: 485, y: 585 },
   "Walls are not crumbling/leaning over": { x: 485, y: 557 },
-  "Roof is not leaking": { x: 485, y: 526 },
+  "Roof is not leaking": { x: 485, y: 529 },
   "Separate food preparation area with piped hot water": { x: 485, y: 502 },
   "Walls are easy to clean": { x: 485, y: 474 },
   "Nappies are changed away from food preparation area": { x: 485, y: 450 },
@@ -93,7 +93,7 @@ function splitTextIntoLines(text, font, size, maxWidth) {
 async function fillPdfWithData(data, index) {
   const existingPdfBytes = await fs.readFile(templatePDF);
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
-  const font = await pdfDoc.embedFont(StandardFonts.TimesRoman); 
+  const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
 
   const pages = pdfDoc.getPages();
   const firstPage = pages[0];
