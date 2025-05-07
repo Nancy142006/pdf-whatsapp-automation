@@ -100,7 +100,7 @@ async function fillPdfWithData(data, index) {
   const secondPage = pages[1];
 
   const ownerName = data["ECD Owner Name"] || "N/A";
-  firstPage.drawText(ownerName, {
+  firstPage.drawText(`${ownerName},`, {
     x: 61,
     y: 738,
     size: 12,
