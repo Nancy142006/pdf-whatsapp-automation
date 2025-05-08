@@ -14,6 +14,15 @@ function sendWhatsAppMessage(filePath) {
   console.log("sent:", path.basename(filePath));
 }
 
+// rate limiter
+async function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+}
+
 const fieldCoordinates = {
   " ECD has electricity": { x: 460, y: 447 },
   "Heating/Cooking is away from children's reach": { x: 460, y: 424 },
@@ -174,6 +183,7 @@ async function processCSV() {
         try {
           const filePath = await fillPdfWithData(results[i], i);
           sendWhatsAppMessage(filePath);
+          await delay(1200);
         } catch (err) {
           console.error("Error creating PDF for entry:", i, err);
         }
