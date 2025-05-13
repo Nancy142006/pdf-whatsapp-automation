@@ -3,15 +3,44 @@ const path = require("path");
 const csv = require("csv-parser");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
-const inputCSV = "data.csv";
+const inputCSV = "data1.csv";
 const templatePDF = "template.pdf";
 const outputFolder = "generated_pdfs";
 
 fs.ensureDirSync(outputFolder);
 
-// Dummy WhatsApp function
-function sendWhatsAppMessage(filePath) {
-  console.log("sent:", path.basename(filePath));
+async function sendMessage(phoneNumber, message) {
+  const url = "https://whatsapp.turn.io/v1/messages";
+  const token = TURN_TOKEN;
+  const data = {
+    to: phoneNumber,
+    type: "template",
+    template: {
+      namespace: "b28cb7ce_ecd8_416e_a389_ed0371d0b19a",
+      name: template_name,
+      language: {
+        code: "en",
+        policy: "deterministic",
+      },
+      components: components,
+    },
+  };
+
+  awaitaxios
+    .post(url, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((response) => {
+      console.log(`Message Sent to ${phoneNumber}`);
+      return "OK";
+    })
+    .catch((err) => {
+      console.error(`Message Sending failed for ${phoneNumber}`);
+      return "ERROR";
+    });
 }
 
 // rate limiter
@@ -182,7 +211,9 @@ async function processCSV() {
       for (let i = 0; i < results.length; i++) {
         try {
           const filePath = await fillPdfWithData(results[i], i);
-          sendWhatsAppMessage(filePath);
+
+          // const pdfID = async uploadFile(filePath);
+          sendMessage(/*results[i]["WhatsApp number"]*/ "6230583025");
           await delay(1200);
         } catch (err) {
           console.error("Error creating PDF for entry:", i, err);
