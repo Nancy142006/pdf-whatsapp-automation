@@ -2,6 +2,13 @@ const fs = require("fs-extra");
 const path = require("path");
 const csv = require("csv-parser");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
+const express = require("express");
+const multer = require("multer");
+const request = require("request");
+const axios = require("axios");
+
+const app = express();
+const upload = multer({dest: "temp/"});
 
 const inputCSV = "data1.csv";
 const templatePDF = "template.pdf";
@@ -9,6 +16,42 @@ const outputFolder = "generated_pdfs";
 
 fs.ensureDirSync(outputFolder);
 
+// upload endpoint
+app.post('/upload', upload.single('file'), (req, res) => {
+  let response = '';
+  try {
+    fs.readFile('temp/' + req.file.filename, function (err, data) {
+      if (err) return console.error(err);
+
+      options = {
+        url: 'https://whatsapp.turn.io/v1/media',
+        body: data,
+        headers: {
+          'Authorization': `Bearer {token} `,
+          'Content-Type': "application/pdf"
+        }
+      }
+
+      request.post(options, function (err, message, data) {
+        if (err) return console.error(err);
+
+        data = JSON.parse(data);
+        try {
+          return res.status(200).json({media_id: data.media[0].id});
+        }  catch(err) {
+          return res.status(400).json({message: "Media ID could not be created. Please check the file again and upload"});
+        }
+
+      });
+    });
+
+  } catch(err) {
+    console.error(err);
+    return res.status(400).json({message: "Invalid Request"});
+  }
+})
+
+//Whatsapp messaging function
 async function sendMessage(phoneNumber, message) {
   const url = "https://whatsapp.turn.io/v1/messages";
   const token = TURN_TOKEN;
@@ -26,7 +69,7 @@ async function sendMessage(phoneNumber, message) {
     },
   };
 
-  awaitaxios
+  await axios
     .post(url, data, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -211,9 +254,8 @@ async function processCSV() {
       for (let i = 0; i < results.length; i++) {
         try {
           const filePath = await fillPdfWithData(results[i], i);
-
-          // const pdfID = async uploadFile(filePath);
-          sendMessage(/*results[i]["WhatsApp number"]*/ "6230583025");
+          // const pdfID = uploadMedia(filePath);
+          sendMessage(/*results[i]["WhatsApp number"]*/ "62303025");
           await delay(1200);
         } catch (err) {
           console.error("Error creating PDF for entry:", i, err);
@@ -224,3 +266,8 @@ async function processCSV() {
 }
 
 processCSV();
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT,()=>{
+  console.log(`Server running on port ${PORT}`);
+});
